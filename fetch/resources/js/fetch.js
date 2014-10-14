@@ -18,7 +18,7 @@ function supercoolfieldsEmbedRefresh($input) {
   var url = $input.val(),
       $target = $input.parent().find('.fetch-preview'),
       request = $.ajax({
-        url: '/actions/fetch/embed/get',
+        url: '/actions/fetch/get',
         type: 'POST',
         data: { url : url },
         dataType: 'json'
