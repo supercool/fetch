@@ -1,0 +1,52 @@
+.fetch {
+  position: relative;
+}
+.fetch .spinner {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.fetch .error,
+.fetch .success {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.fetch-preview {
+  margin-top: 15px;
+}
+
+/* force the content to be fluid */
+.fetch-preview .fetch > * {
+  display: block;
+  width: 100% !important;
+}
+
+
+/* tweets */
+.fetch-preview .fetch--twitter > * {}
+
+
+/* flickr */
+.fetch-preview .fetch--flickr {
+  max-width: 100%;
+  height: auto !important;
+}
+
+
+/* videos, assume they are all 16:9 */
+.fetch-preview .fetch--youtube,
+.fetch-preview .fetch--vimeo {
+  position: relative;
+  padding-bottom: 56.25%; // 16:9
+  height: 0;
+}
+.fetch-preview .fetch--youtube > *,
+.fetch-preview .fetch--vimeo > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
