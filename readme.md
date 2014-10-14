@@ -1,1 +1,1 @@
-# Craft Fetch
+# Fetch - a plugin for Craft
