@@ -19,7 +19,7 @@
 
 .fetch-preview {
   margin-top: 15px;
-  background: url(../images/spinner.gif) no-repeat 50% 50%;
+  background: #ffffff url(../images/spinner.gif) no-repeat 50% 50%;
 
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
