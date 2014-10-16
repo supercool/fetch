@@ -30,9 +30,12 @@ class FetchService extends BaseApplicationComponent
     $apiUrl = '';
     $provider = '';
 
-    if ( $this->settings['embedlyApiKey'] != '' ) {
+    if ( $this->settings['embedlyApiKey'] != '' )
+    {
       $embedlyApiKey = $this->settings['embedlyApiKey'];
-    } else {
+    }
+    else
+    {
       $embedlyApiKey = false;
     }
 
