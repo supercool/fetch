@@ -45,13 +45,18 @@ class FetchService extends BaseApplicationComponent
       $url = 'http://' . $url;
     }
 
-    // switch on the provider
-    if ( strpos($url, 'vimeo') !== false ) { // vimeo
+    // switch on the provider, starting with vimeo
+    if ( strpos($url, 'vimeo') !== false )
+    {
 
       $provider = 'vimeo';
       $apiUrl = 'https://vimeo.com/api/oembed.json?url='.$url.'&byline=false&title=false&portrait=false&autoplay=false';
 
-    } elseif ( strpos($url, 'twitter') !== false ) { // twitter
+    }
+
+    // twitter
+    elseif ( strpos($url, 'twitter') !== false )
+    {
 
       $provider = 'twitter';
       if ( $scripts ) {
@@ -60,34 +65,63 @@ class FetchService extends BaseApplicationComponent
         $apiUrl = 'https://api.twitter.com/1/statuses/oembed.json?url='.$url.'&omit_script=true';
       }
 
-    } elseif ( strpos($url, 'youtu') !== false ) { // youtube
+    }
+
+    // youtube
+    elseif ( strpos($url, 'youtu') !== false )
+    {
 
       $provider = 'youtube';
       $apiUrl = 'https://www.youtube.com/oembed?url='.$url.'&format=json';
 
       // add these params to the html after curling ?
       // &modestbranding=1&rel=0&showinfo=0&autoplay=0
-    } elseif ( strpos($url, 'flickr') !== false ) { // flickr
+    }
+
+    // flickr
+    elseif ( strpos($url, 'flickr') !== false )
+    {
 
       $provider = 'flickr';
       $apiUrl = 'https://www.flickr.com/services/oembed?url='.$url.'&format=json';
 
-    } elseif ( strpos($url, 'soundcloud') !== false ) { // soundcloud
+    }
+
+    // soundcloud
+    elseif ( strpos($url, 'soundcloud') !== false )
+    {
 
       $provider = 'soundcloud';
       $apiUrl = 'https://soundcloud.com/oembed?url='.$url.'&format=json';
 
-    } elseif ( strpos($url, 'instagr') !== false ) { // instagram
+    }
+
+    // instagram
+    elseif ( strpos($url, 'instagr') !== false )
+    {
 
       $provider = 'instagram';
       $apiUrl = 'https://api.instagram.com/oembed?url='.$url;
 
-    } elseif ( strpos($url, 'pinterest') !== false && $embedlyApiKey ) { // pinterest
+    }
+
+    // pinterest
+    elseif ( strpos($url, 'pinterest') !== false && $embedlyApiKey )
+    {
 
       $provider = 'pinterest';
       $apiUrl = 'https://api.embed.ly/1/oembed?key='.$embedlyApiKey.'&url='.$url;
-
     }
+
+    // unsupported service
+    else
+    {
+      return array(
+        'success' => false,
+        'error' => Craft::t("Sorry that service isn’t supported yet.")
+      );
+    }
+
 
 
     // create curl resource
@@ -111,18 +145,39 @@ class FetchService extends BaseApplicationComponent
 
 
     // see if we have any html
-    if ( $provider === 'flickr' || $provider === 'instagram' || $provider === 'pinterest' ) {
+    if ( $provider === 'flickr' || $provider === 'instagram' || $provider === 'pinterest' )
+    {
 
-      if ( isset($decodedJSON['url']) && $decodedJSON['type'] == 'photo' ) {
+      if ( isset($decodedJSON['url']) && $decodedJSON['type'] == 'photo' )
+      {
+
         $data = '<img src="'.$decodedJSON['url'].'" width="'.$decodedJSON['width'].'" height="'.$decodedJSON['height'].'" class="fetch fetch--'.$provider.'">';
-      } else {
-        return false;
+
+      }
+      else
+      {
+
+        return array(
+          'success' => false,
+          'error' => Craft::t("Sorry that image didn’t seem to work.")
+        );
+
       }
 
-    } else {
+    }
+    else
+    {
 
-      if ( isset($decodedJSON['html']) && ( ctype_space($decodedJSON['html']) === false || $decodedJSON['html'] !== '' ) ) {
+      if ( isset($decodedJSON['html']) && ( ctype_space($decodedJSON['html']) === false || $decodedJSON['html'] !== '' ) )
+      {
         $data = '<div class="fetch  fetch--'.$provider.'">'.$decodedJSON['html'].'</div>';
+      }
+      else
+      {
+        return array(
+          'success' => false,
+          'error' => Craft::t("Sorry that url didn’t seem to work.")
+        );
       }
 
     }
@@ -135,14 +190,37 @@ class FetchService extends BaseApplicationComponent
 
 
     // check we haven't any errors or 404 etc
-    if ( !isset($data) || strpos($data, '<html') !== false || isset($decodedJSON['errors']) || strpos($data, 'Not Found') !== false ) {
-      return false;
-    } else {
-      if ( $twig && $twig_html ) {
-        return $twig_html;
-      } else {
-        return $data;
+    if ( !isset($data) || strpos($data, '<html') !== false || isset($decodedJSON['errors']) || strpos($data, 'Not Found') !== false )
+    {
+
+      return array(
+        'success' => false,
+        'error' => Craft::t("Sorry content for that url couldn’t be found.")
+      );
+
+    }
+    else
+    {
+
+      if ( $twig && $twig_html )
+      {
+
+        return array(
+          'success' => true,
+          'content' => $twig_html
+        );
+
       }
+      else
+      {
+
+        return array(
+          'success' => true,
+          'content' => $data
+        );
+
+      }
+
     }
 
   }
