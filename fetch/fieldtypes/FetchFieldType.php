@@ -59,9 +59,9 @@ class FetchFieldType extends BaseFieldType
   {
 
     craft()->templates->includeCssResource('fetch/css/fetch.css');
-    // craft()->templates->includeJsResource('fetch/js/fetch.js');
+    craft()->templates->includeJsResource('fetch/js/fetch.js');
 
-    $settings = $this->getSettings();
+    craft()->templates->includeJs('new Craft.Fetch("'.craft()->templates->namespaceInputId($name).'");');
 
     return craft()->templates->render('fetch/field', array(
       'name'  => $name,

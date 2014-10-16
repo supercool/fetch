@@ -1,20 +1,33 @@
 .fetch {
   position: relative;
 }
-.fetch .spinner {
+.fetch > .spinner {
   position: absolute;
   top: 0;
   right: 0;
 }
-.fetch .error,
-.fetch .success {
+.fetch > .error,
+.fetch > .success {
   position: absolute;
   top: 6px;
   right: 6px;
 }
 
+.fetch-errors {
+  margin: 1em 0;
+}
+
 .fetch-preview {
   margin-top: 15px;
+  background: url(../images/spinner.gif) no-repeat 50% 50%;
+
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+
+  -webkit-box-shadow: 0 0 2px rgba(51, 170, 255, 0), inset 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 2px 5px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(51, 170, 255, 0);
+  -moz-box-shadow: 0 0 2px rgba(51, 170, 255, 0), inset 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 2px 5px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(51, 170, 255, 0);
+  box-shadow: 0 0 2px rgba(51, 170, 255, 0), inset 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 2px 5px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(51, 170, 255, 0);
 }
 
 /* force the content to be fluid */

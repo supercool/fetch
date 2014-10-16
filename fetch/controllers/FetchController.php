@@ -15,24 +15,16 @@ class FetchController extends BaseController
 
   public function actionGet()
   {
-    // Only ajax post requests
+
+    // only ajax post requests
     $this->requirePostRequest();
     $this->requireAjaxRequest();
 
-
+    // grab url
     $url = craft()->request->getPost('url');
-    $html = craft()->fetch->get($url, true, false);
 
-    if ( $html ) {
-      $this->returnJson(array(
-        'success' => true,
-        'html' => $html
-      ));
-    } else {
-      $this->returnJson(array(
-        'success' => false
-      ));
-    }
+    // return result as json
+    $this->returnJson(craft()->fetch->get($url));
 
   }
 
