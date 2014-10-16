@@ -24,7 +24,7 @@ class FetchService extends BaseApplicationComponent
   }
 
 
-  public function get($url, $scripts = true, $twig = true)
+  public function get($url, $scripts = true)
   {
 
     $apiUrl = '';
@@ -145,7 +145,7 @@ class FetchService extends BaseApplicationComponent
       if ( isset($decodedJSON['url']) && $decodedJSON['type'] == 'photo' )
       {
 
-        $data = '<img src="'.$decodedJSON['url'].'" width="'.$decodedJSON['width'].'" height="'.$decodedJSON['height'].'" class="fetch fetch--'.$provider.'">';
+        $html = '<img src="'.$decodedJSON['url'].'" width="'.$decodedJSON['width'].'" height="'.$decodedJSON['height'].'" class="fetch fetch--'.$provider.'">';
 
       }
       else
@@ -164,7 +164,7 @@ class FetchService extends BaseApplicationComponent
 
       if ( isset($decodedJSON['html']) && ( ctype_space($decodedJSON['html']) === false || $decodedJSON['html'] !== '' ) )
       {
-        $data = '<div class="fetch  fetch--'.$provider.'">'.$decodedJSON['html'].'</div>';
+        $html = '<div class="fetch  fetch--'.$provider.'">'.$decodedJSON['html'].'</div>';
       }
       else
       {
@@ -177,14 +177,8 @@ class FetchService extends BaseApplicationComponent
     }
 
 
-    // thanks to https://github.com/A-P/Embedder for this bit!
-    // set the encode html to output properly in Twig
-    $charset = craft()->templates->getTwig()->getCharset();
-    $twig_html = new \Twig_Markup($data, $charset);
-
-
     // check we haven't any errors or 404 etc
-    if ( !isset($data) || strpos($data, '<html') !== false || isset($decodedJSON['errors']) || strpos($data, 'Not Found') !== false )
+    if ( !isset($html) || strpos($html, '<html') !== false || isset($decodedJSON['errors']) || strpos($html, 'Not Found') !== false )
     {
 
       return array(
@@ -196,24 +190,12 @@ class FetchService extends BaseApplicationComponent
     else
     {
 
-      if ( $twig && $twig_html )
-      {
-
-        return array(
-          'success' => true,
-          'content' => $twig_html
-        );
-
-      }
-      else
-      {
-
-        return array(
-          'success' => true,
-          'content' => $data
-        );
-
-      }
+      return array(
+        'success' => true,
+        'url'     => $url,
+        'html'    => $html,
+        'scripts' => $scripts
+      );
 
     }
 

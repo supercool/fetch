@@ -24,13 +24,27 @@ class FetchFieldType extends BaseFieldType
   }
 
   /**
-   * @inheritDoc IFieldType::defineContentAttribute()
+   * @inheritDoc IFieldType::prepValue()
    *
-   * @return mixed
+   * @param string $value
+   *
+   * @return string|FetchModel
    */
-  public function defineContentAttribute()
+  public function prepValue($value)
   {
-    return AttributeType::Mixed;
+
+    $model = new FetchModel;
+    $model->url = $value;
+
+    if ( $model->validate() )
+    {
+      return $model;
+    }
+    else
+    {
+      return $value;
+    }
+
   }
 
   /**
@@ -96,19 +110,14 @@ class FetchFieldType extends BaseFieldType
       $errors = array();
     }
 
-    // get settings - we don't have any yet but this is just here to remind me
-    // what I need when we do have them...
-    $settings = $this->getSettings();
-
-
     // make and populate our model
     $model = new FetchModel;
-    $model->fetch = $value;
+    $model->url = $value;
 
     // validate the model
     if ( ! $model->validate() )
     {
-      $errors = array_merge($errors, $model->getErrors('fetch'));
+      $errors = array_merge($errors, $model->getErrors('url'));
     }
 
     // return errors or true

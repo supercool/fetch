@@ -21,12 +21,12 @@ class FetchValidator extends CValidator
     // get value
     $value = $object->$attribute;
 
-    // check the url brought something correct back
-    $result = craft()->fetch->get($value, false, false);
+    // process it
+    $result = craft()->fetch->get($value);
 
+    // if it didn’t work, spit back the error message
     if ( $result['success'] === false )
     {
-      // $message = Craft::t("Sorry, that url doesn’t seem to work, please try again.");
       $message = $result['error'];
       $this->addError($object, $attribute, $message);
     }

@@ -13,23 +13,99 @@ namespace Craft;
 class FetchModel extends BaseModel
 {
 
-  protected function defineAttributes()
+  // Properties
+  // =========================================================================
+
+  /**
+   * @var
+   */
+  private $_result;
+
+
+  // Public Methods
+  // =========================================================================
+
+  /**
+   * Use the plain url as the string representation.
+   *
+   * @return \Twig_Markup
+   */
+  public function __toString()
   {
-    return array(
-      'fetch' => array(
-        'type'     => AttributeType::String,
-        'required' => true
-      )
-    );
+    return $this->url;
   }
 
+
+  /**
+   * Returns the embed code as a Twig_Markup
+   *
+   * @return \Twig_Markup
+   */
+  public function getTwig()
+  {
+    return TemplateHelper::getRaw($this->_getHtml());
+  }
+
+
+  /**
+   * Returns the embed code as a plain HTML
+   *
+   * @return string
+   */
+  public function getHtml()
+  {
+    return $this->_getHtml();
+  }
+
+
+  /**
+   * @inheritDoc BaseModel::rules()
+   *
+   * @return array
+   */
   public function rules()
   {
     $rules = parent::rules();
 
-    $rules[] = array('fetch', 'Craft\FetchValidator');
+    $rules[] = array('url', 'Craft\FetchValidator');
 
     return $rules;
   }
+
+
+  // Protected Methods
+  // =========================================================================
+
+  /**
+   * @inheritDoc BaseModel::defineAttributes()
+   *
+   * @return array
+   */
+  protected function defineAttributes()
+  {
+    return array(
+      'url'  => array(AttributeType::String, 'required' => true)
+    );
+  }
+
+
+  // Private Methods
+  // =========================================================================
+
+  /**
+   *
+   */
+  private function _getHtml()
+  {
+
+    if (!isset($this->_result))
+    {
+      $this->_result = craft()->fetch->get($this->url);
+    }
+
+    return $this->_result['html'];
+
+  }
+
 
 }
