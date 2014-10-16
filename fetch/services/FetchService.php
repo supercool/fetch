@@ -39,15 +39,6 @@ class FetchService extends BaseApplicationComponent
       $embedlyApiKey = false;
     }
 
-    // clean up spaces, flipping users.
-    $url = trim($url);
-
-    // check if there is a protocol, add if not
-    if ( parse_url($url, PHP_URL_SCHEME) === null )
-    {
-      $url = 'http://' . $url;
-    }
-
     // switch on the provider, starting with vimeo
     if ( strpos($url, 'vimeo') !== false )
     {

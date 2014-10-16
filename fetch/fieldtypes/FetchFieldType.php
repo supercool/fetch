@@ -57,6 +57,29 @@ class FetchFieldType extends BaseFieldType
   }
 
   /**
+   * @inheritDoc IFieldType::prepValueFromPost()
+   *
+   * @param string $value
+   *
+   * @return string
+   */
+  public function prepValueFromPost($value)
+  {
+
+    // clean up spaces, flipping users.
+    $value = trim($value);
+
+    // check if there is a protocol, add if not
+    if ( parse_url($value, PHP_URL_SCHEME) === null )
+    {
+      $value = 'http://' . $value;
+    }
+
+    return $value;
+
+  }
+
+  /**
    * @inheritDoc IFieldType::validate()
    *
    * @param string $value
