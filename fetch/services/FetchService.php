@@ -27,6 +27,16 @@ class FetchService extends BaseApplicationComponent
   public function get($url, $scripts = true)
   {
 
+    // clean up spaces, flipping users.
+    $url = trim($url);
+
+    // check if there is a protocol, add if not
+    if ( parse_url($url, PHP_URL_SCHEME) === null )
+    {
+      $url = 'http://' . $url;
+    }
+
+    // prep
     $apiUrl = '';
     $provider = '';
 
