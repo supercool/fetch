@@ -13,11 +13,34 @@ namespace Craft;
 class FetchFieldType extends BaseFieldType
 {
 
+  /**
+   * @inheritDoc IComponentType::getName()
+   *
+   * @return string
+   */
   public function getName()
   {
     return Craft::t('Fetch');
   }
 
+  /**
+   * @inheritDoc IFieldType::defineContentAttribute()
+   *
+   * @return mixed
+   */
+  public function defineContentAttribute()
+  {
+    return AttributeType::Mixed;
+  }
+
+  /**
+   * @inheritDoc IFieldType::getInputHtml()
+   *
+   * @param string $name
+   * @param mixed  $value
+   *
+   * @return string
+   */
   public function getInputHtml($name, $value)
   {
 
@@ -33,12 +56,19 @@ class FetchFieldType extends BaseFieldType
 
   }
 
+  /**
+   * @inheritDoc IFieldType::validate()
+   *
+   * @param string $value
+   *
+   * @return true|string|array
+   */
   public function validate($value)
   {
     // get any current errors
     $errors = parent::validate($value);
 
-    if (!is_array($errors))
+    if ( ! is_array($errors) )
     {
       $errors = array();
     }
@@ -53,7 +83,7 @@ class FetchFieldType extends BaseFieldType
     $model->fetch = $value;
 
     // validate the model
-    if ( !$model->validate() )
+    if ( ! $model->validate() )
     {
       $errors = array_merge($errors, $model->getErrors('fetch'));
     }
