@@ -21,14 +21,20 @@ class FetchValidator extends CValidator
     // get value
     $value = $object->$attribute;
 
-    // process it
-    $result = craft()->fetch->get($value);
 
-    // if it didn’t work, spit back the error message
-    if ( $result['success'] === false )
+    if ( ! empty($value) )
     {
-      $message = $result['error'];
-      $this->addError($object, $attribute, $message);
+
+      // process it
+      $result = craft()->fetch->get($value);
+
+      // if it didn’t work, spit back the error message
+      if ( $result['success'] === false )
+      {
+        $message = $result['error'];
+        $this->addError($object, $attribute, $message);
+      }
+
     }
 
   }

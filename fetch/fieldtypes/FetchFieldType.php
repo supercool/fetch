@@ -33,16 +33,21 @@ class FetchFieldType extends BaseFieldType
   public function prepValue($value)
   {
 
-    $model = new FetchModel;
-    $model->url = $value;
+    if ( ! empty($value) )
+    {
 
-    if ( $model->validate() )
-    {
-      return $model;
-    }
-    else
-    {
-      return $value;
+      $model = new FetchModel;
+      $model->url = $value;
+
+      if ( $model->validate() )
+      {
+        return $model;
+      }
+      else
+      {
+        return $value;
+      }
+
     }
 
   }
@@ -83,10 +88,13 @@ class FetchFieldType extends BaseFieldType
     // clean up spaces, flipping users.
     $value = trim($value);
 
-    // check if there is a protocol, add if not
-    if ( parse_url($value, PHP_URL_SCHEME) === null )
+    if ( ! empty($value) )
     {
-      $value = 'http://' . $value;
+      // check if there is a protocol, add if not
+      if ( parse_url($value, PHP_URL_SCHEME) === null )
+      {
+        $value = 'http://' . $value;
+      }
     }
 
     return $value;
@@ -102,6 +110,12 @@ class FetchFieldType extends BaseFieldType
    */
   public function validate($value)
   {
+
+    if ( empty($value) )
+    {
+      return true;
+    }
+
     // get any current errors
     $errors = parent::validate($value);
 
