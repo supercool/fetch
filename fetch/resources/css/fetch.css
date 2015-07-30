@@ -41,6 +41,12 @@
 .fetch-preview .fetch--twitter > * {}
 
 
+/* instagram */
+.fetch-preview .fetch--instagram > * {
+  max-width: 100% !important;
+}
+
+
 /* flickr */
 .fetch-preview .fetch--flickr {
   max-width: 100%;

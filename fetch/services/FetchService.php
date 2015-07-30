@@ -61,23 +61,19 @@ class FetchService extends BaseApplicationComponent
     // twitter
     elseif ( strpos($url, 'twitter') !== false )
     {
-
       $provider = 'twitter';
       if ( $scripts ) {
         $apiUrl = 'https://api.twitter.com/1/statuses/oembed.json?url='.$url;
       } else {
         $apiUrl = 'https://api.twitter.com/1/statuses/oembed.json?url='.$url.'&omit_script=true';
       }
-
     }
 
     // youtube
     elseif ( strpos($url, 'youtu') !== false )
     {
-
       $provider = 'youtube';
       $apiUrl = 'https://www.youtube.com/oembed?url='.$url.'&format=json';
-
       // add these params to the html after curling ?
       // &modestbranding=1&rel=0&showinfo=0&autoplay=0
     }
@@ -85,34 +81,27 @@ class FetchService extends BaseApplicationComponent
     // flickr
     elseif ( strpos($url, 'flickr') !== false )
     {
-
       $provider = 'flickr';
       $apiUrl = 'https://www.flickr.com/services/oembed?url='.$url.'&format=json';
-
     }
 
     // soundcloud
     elseif ( strpos($url, 'soundcloud') !== false )
     {
-
       $provider = 'soundcloud';
       $apiUrl = 'https://soundcloud.com/oembed?url='.$url.'&format=json';
-
     }
 
     // instagram
     elseif ( strpos($url, 'instagr') !== false )
     {
-
       $provider = 'instagram';
-      $apiUrl = 'https://api.instagram.com/oembed?url='.$url;
-
+      $apiUrl = 'https://api.instagram.com/publicapi/oembed?url='.$url;
     }
 
     // pinterest
     elseif ( strpos($url, 'pinterest') !== false && $embedlyApiKey )
     {
-
       $provider = 'pinterest';
       $apiUrl = 'https://api.embed.ly/1/oembed?key='.$embedlyApiKey.'&url='.$url;
     }
@@ -147,9 +136,8 @@ class FetchService extends BaseApplicationComponent
     // decode returned json
     $decodedJSON = json_decode($output, true);
 
-
     // see if we have any html
-    if ( $provider === 'flickr' || $provider === 'instagram' || $provider === 'pinterest' )
+    if ( $provider === 'flickr' || $provider === 'pinterest' )
     {
 
       if ( isset($decodedJSON['url']) && $decodedJSON['type'] == 'photo' )
