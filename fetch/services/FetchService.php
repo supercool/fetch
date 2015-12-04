@@ -96,7 +96,7 @@ class FetchService extends BaseApplicationComponent
     elseif ( strpos($url, 'instagr') !== false )
     {
       $provider = 'instagram';
-      $apiUrl = 'https://instagram.com/publicapi/oembed/?url='.$url;
+      $apiUrl = 'https://api.instagram.com/oembed/?url='.$url;
     }
 
     // pinterest
