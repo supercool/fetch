@@ -174,6 +174,23 @@ class FetchService extends BaseApplicationComponent
 
     }
 
+    // For Instagram add thumbnail_url for all
+    if ( $provider === 'instagram' && !isset($decodedJSON['thumbnail_url']) )
+    {
+
+      // String query string if there is one
+      $thumbUrl = preg_replace('/\?.*/', '', $url);
+
+      // Add the media thumb part
+      $thumbUrl .= '/media?size=l';
+
+      // Remove any double slashes
+      $thumbUrl = preg_replace('/([^:])(\/{2,})/', '$1/', $thumbUrl);
+
+      // Set it on the thumbnail_url attribute
+      $decodedJSON['thumbnail_url'] = $thumbUrl;
+
+    }
 
     // check we haven't any errors or 404 etc
     if ( !isset($html) || strpos($html, '<html') !== false || isset($decodedJSON['errors']) || strpos($html, 'Not Found') !== false )
