@@ -57,6 +57,15 @@ class FetchModel extends BaseModel
     return $this->_getHtml();
   }
 
+  /**
+   * Returns the whole json object
+   *
+   * @return string
+   */
+  public function getObject()
+  {
+    return $this->_getObject();
+  }
 
   /**
    * @inheritDoc BaseModel::rules()
@@ -92,9 +101,6 @@ class FetchModel extends BaseModel
   // Private Methods
   // =========================================================================
 
-  /**
-   *
-   */
   private function _getHtml()
   {
 
@@ -104,6 +110,18 @@ class FetchModel extends BaseModel
     }
 
     return $this->_result['html'];
+
+  }
+
+  private function _getObject()
+  {
+
+    if (!isset($this->_result))
+    {
+      $this->_result = craft()->fetch->get($this->url);
+    }
+
+    return $this->_result['object'];
 
   }
 

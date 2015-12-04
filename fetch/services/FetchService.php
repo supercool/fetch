@@ -208,6 +208,7 @@ class FetchService extends BaseApplicationComponent
       return array(
         'success' => true,
         'url'     => $url,
+        'object'  => $decodedJSON,
         'html'    => $html,
         'scripts' => $scripts
       );
