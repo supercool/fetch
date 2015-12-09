@@ -68,6 +68,16 @@ class FetchModel extends BaseModel
   }
 
   /**
+   * Returns the provider
+   *
+   * @return string
+   */
+  public function getProvider()
+  {
+    return $this->_getProvider();
+  }
+
+  /**
    * @inheritDoc BaseModel::rules()
    *
    * @return array
@@ -122,6 +132,19 @@ class FetchModel extends BaseModel
     }
 
     return $this->_result['object'];
+
+  }
+
+
+  private function _getProvider()
+  {
+
+    if (!isset($this->_result))
+    {
+      $this->_result = craft()->fetch->get($this->url);
+    }
+
+    return $this->_result['provider'];
 
   }
 

@@ -96,6 +96,12 @@ class FetchService extends BaseApplicationComponent
     elseif ( strpos($url, 'instagr') !== false )
     {
       $provider = 'instagram';
+      // Try and parse out the shortcode
+      if (preg_match("/(https?:)?\/\/(.*\.)?instagr(\.am|am\.com)\/p\/([^\/]*)/i", $url, $matches))
+      {
+        $shortcode = $matches[5];
+        $url = "https://www.instagram.com/p/{$shortcode}/"
+      }
       $apiUrl = 'https://api.instagram.com/oembed/?url='.$url;
     }
 
@@ -175,21 +181,18 @@ class FetchService extends BaseApplicationComponent
     }
 
     // For Instagram add thumbnail_url for all
-    if ( $provider === 'instagram' && !isset($decodedJSON['thumbnail_url']) )
+    if ( $provider === 'instagram' )
     {
-
-      // String query string if there is one
-      $thumbUrl = preg_replace('/\?.*/', '', $url);
-
-      // Add the media thumb part
-      $thumbUrl .= '/media?size=l';
-
-      // Remove any double slashes
-      $thumbUrl = preg_replace('/([^:])(\/{2,})/', '$1/', $thumbUrl);
-
-      // Set it on the thumbnail_url attribute
-      $decodedJSON['thumbnail_url'] = $thumbUrl;
-
+      if (isset($shortcode))
+      {
+        $decodedJSON['thumbnail_url'] = "https://instagram.com/p/{$shortcode}/media/?size=l"
+        $decodedJSON['shortcode'] = $shortcode;
+      }
+      else
+      {
+        $decodedJSON['thumbnail_url'] = false;
+        $decodedJSON['shortcode'] = false;
+      }
     }
 
     // check we haven't any errors or 404 etc
@@ -206,11 +209,12 @@ class FetchService extends BaseApplicationComponent
     {
 
       return array(
-        'success' => true,
-        'url'     => $url,
-        'object'  => $decodedJSON,
-        'html'    => $html,
-        'scripts' => $scripts
+        'success'  => true,
+        'url'      => $url,
+        'provider' => $provider
+        'object'   => $decodedJSON,
+        'html'     => $html,
+        'scripts'  => $scripts
       );
 
     }
