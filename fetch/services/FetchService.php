@@ -183,19 +183,35 @@ class FetchService extends BaseApplicationComponent
 
     }
 
-    // For Instagram add thumbnail_url for all
+    // Instagram mods
     if ( $provider === 'instagram' )
     {
+
+      // Shortcode and media url
+      $decodedJSON['shortcode'] = false;
       if (isset($shortcode))
       {
-        $decodedJSON['thumbnail_url'] = "https://instagram.com/p/{$shortcode}/media/?size=l";
+        $decodedJSON['thumbnail_url'] = "https://instagram.com/p/{$shortcode}/media/";
         $decodedJSON['shortcode'] = $shortcode;
       }
       else
       {
-        $decodedJSON['thumbnail_url'] = false;
-        $decodedJSON['shortcode'] = false;
+        if (!isset($decodedJSON['thumbnail_url']))
+        {
+          $decodedJSON['thumbnail_url'] = false;
+        }
       }
+
+      // Date it was posted
+      $decodedJSON['date'] = false;
+      if(preg_match("/(datetime\=)(.*)(\")(.*)(\")(.*)/i", $html, $matches))
+      {
+        if (isset($matches[4]))
+        {
+          $decodedJSON['date'] = DateTime::createFromString($matches[4]);
+        }
+      }
+
     }
 
     // check we haven't any errors or 404 etc
