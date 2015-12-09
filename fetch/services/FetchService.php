@@ -99,8 +99,11 @@ class FetchService extends BaseApplicationComponent
       // Try and parse out the shortcode
       if (preg_match("/(https?:)?\/\/(.*\.)?instagr(\.am|am\.com)\/p\/([^\/]*)/i", $url, $matches))
       {
-        $shortcode = $matches[5];
-        $url = "https://www.instagram.com/p/{$shortcode}/"
+        if (isset($matches[4]))
+        {
+          $shortcode = $matches[4];
+          $url = "https://www.instagram.com/p/{$shortcode}/";
+        }
       }
       $apiUrl = 'https://api.instagram.com/oembed/?url='.$url;
     }
@@ -185,7 +188,7 @@ class FetchService extends BaseApplicationComponent
     {
       if (isset($shortcode))
       {
-        $decodedJSON['thumbnail_url'] = "https://instagram.com/p/{$shortcode}/media/?size=l"
+        $decodedJSON['thumbnail_url'] = "https://instagram.com/p/{$shortcode}/media/?size=l";
         $decodedJSON['shortcode'] = $shortcode;
       }
       else
@@ -211,7 +214,7 @@ class FetchService extends BaseApplicationComponent
       return array(
         'success'  => true,
         'url'      => $url,
-        'provider' => $provider
+        'provider' => $provider,
         'object'   => $decodedJSON,
         'html'     => $html,
         'scripts'  => $scripts
