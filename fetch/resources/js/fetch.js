@@ -61,33 +61,23 @@ Craft.Fetch = Garnish.Base.extend(
     if ( this.$input.val() !== '' )
     {
 
-      // spin
       this.setWorking();
 
-      // POST url off
-      $.ajax({
-        url: '/actions/fetch/get',
-        type: 'POST',
-        data: { url : this.$input.val() },
-        dataType: 'json'
-      }).done( $.proxy(function(msg)
-      {
+      var data = {
+        url : this.$input.val()
+      };
 
-        if ( msg.success )
+      Craft.postActionRequest('fetch/get', data, $.proxy(function(data, textStatus, jqXHR)
+      {
+        if ( data.success )
         {
-          this.setSuccess(msg.html);
+          this.setSuccess(data.html);
         }
         else
         {
-          this.setError(msg.error);
+          this.setError(data.error);
         }
-
-      }, this) ).fail( $.proxy(function(jqXHR, textStatus)
-      {
-
-        this.setError(msg.error);
-
-      }, this) );
+      }, this));
 
     }
 
