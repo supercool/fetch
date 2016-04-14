@@ -214,6 +214,17 @@ class FetchService extends BaseApplicationComponent
 
     }
 
+    // Youtube mods
+    if ( $provider === 'youtube' )
+    {
+      preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?#&\"'>]+)/", $url, $matches);
+
+      if (count($matches > 1)) {
+        $decodedJSON['youtube_id'] = $matches[1];
+      }
+
+    }
+
     // check we haven't any errors or 404 etc
     if ( !isset($html) || strpos($html, '<html') !== false || isset($decodedJSON['errors']) || strpos($html, 'Not Found') !== false )
     {
