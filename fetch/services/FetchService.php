@@ -230,12 +230,19 @@ class FetchService extends BaseApplicationComponent
       // Youtube mods
       if ( $provider === 'youtube' )
       {
+        // Add youtube ID
         preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?#&\"'>]+)/", $url, $matches);
 
         if (isset($matches[1])) {
           $decodedJSON['youtube_id'] = $matches[1];
         }
 
+        // Modify the url in the iframe to add &wmode=transparent
+        if (isset($html))
+        {
+          $html = preg_replace('/src\=\\"(.*?)\\"(.*?)/i', 'src="$1$2&wmode=transparent"$3', $html);
+          $decodedJSON['html'] = $html;
+        }
       }
 
       // check we haven't any errors or 404 etc
