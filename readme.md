@@ -18,6 +18,6 @@ To install the plugin, follow these instructions.
 
         composer require supercool/fetch
 
-3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Table Maker.
+3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Fetch.
 
 Brought to you by [Supercool Ltd](http://www.supercooldesign.co.uk/)
