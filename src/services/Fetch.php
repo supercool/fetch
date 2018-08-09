@@ -130,7 +130,7 @@ class Fetch extends Component
             {
                 return [
                     'success' => false,
-                    'error' => Craft::t('fetch', 'Sorry that service isn’t supported yet.')
+                    'error' => Craft::t("fetch", "Sorry that service isn’t supported yet.")
                 ];
             }
 
@@ -163,7 +163,7 @@ class Fetch extends Component
                 {
                     return array(
                         'success' => false,
-                        'error' => Craft::t("Sorry that image didn’t seem to work.")
+                        'error' => Craft::t("fetch", "Sorry that image didn’t seem to work.")
                     );
                 }
             }
@@ -177,7 +177,7 @@ class Fetch extends Component
                 {
                     return array(
                         'success' => false,
-                        'error' => Craft::t("Sorry that url didn’t seem to work.")
+                        'error' => Craft::t("fetch", "Sorry that url didn’t seem to work.")
                     );
                 }
             }
@@ -236,7 +236,7 @@ class Fetch extends Component
                 // Don’t cache ones that didn’t work
                 return [
                     'success' => false,
-                    'error' => Craft::t('fetch', 'Sorry content for that url couldn’t be found.')
+                    'error' => Craft::t("fetch", "Sorry content for that url couldn’t be found.")
                 ];
             }
             else

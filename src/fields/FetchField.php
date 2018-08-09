@@ -20,6 +20,7 @@ use craft\helpers\Json;
 use craft\helpers\Template;
 
 use supercool\fetch\Fetch;
+use supercool\fetch\models\Fetch as FetchModel;
 use supercool\fetch\assetbundles\FetchAsset;
 
 class FetchField extends Field
@@ -91,6 +92,21 @@ class FetchField extends Field
      */
     public function normalizeValue($value, ElementInterface $element = null)
     {
+        if ( ! empty($value) )
+        {
+            $model = new FetchModel;
+            $model->url = $value;
+
+            if ( $model->validate() )
+            {
+                return $model;
+            }
+            else
+            {
+                return $value;
+            }
+        }
+
         return $value;
     }
 
@@ -110,6 +126,17 @@ class FetchField extends Field
      */
     public function serializeValue($value, ElementInterface $element = null)
     {
+        $value = trim($value);
+
+        if ( ! empty($value) )
+        {
+          // check if there is a protocol, add if not
+          if ( parse_url($value, PHP_URL_SCHEME) === null )
+          {
+            $value = 'http://' . $value;
+          }
+        }
+
         return parent::serializeValue($value, $element);
     }
 
