@@ -2,7 +2,8 @@
 
 <div class="item" data-colspan="1">
   {{ forms.textField({
-    label: 'Embed.ly API Key'|t,
+    first: true,
+    label: 'Embed.ly API Key'|t('fetch'),
     id: 'embedlyApiKey',
     name: 'embedlyApiKey',
     value: settings.embedlyApiKey,

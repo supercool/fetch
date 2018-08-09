@@ -1,15 +1,15 @@
 /**
- * @author    Supercool Ltd <josh@supercooldesign.co.uk>
- * @copyright Copyright (c) 2014, Supercool Ltd
+ * @author    Supercool Ltd <naveed@supercooldesign.co.uk>
+ * @copyright Copyright (c) 2018, Supercool Ltd
  * @see       http://supercooldesign.co.uk
  */
 
 (function($){
 
-
 /**
  * Fetch Class
  */
+
 Craft.Fetch = Garnish.Base.extend(
 {
 
@@ -67,7 +67,7 @@ Craft.Fetch = Garnish.Base.extend(
         url : this.$input.val()
       };
 
-      Craft.postActionRequest('fetch/get', data, $.proxy(function(data, textStatus, jqXHR)
+      Craft.postActionRequest('fetch/fetch/get', data, $.proxy(function(data, textStatus, jqXHR)
       {
         if ( data.success )
         {
