@@ -25,7 +25,7 @@ use yii\base\Event;
 
 /**
  * @author    Supercool Ltd
- * @package   TableMaker
+ * @package   Fetch
  * @since     1.0.0
  */
 
