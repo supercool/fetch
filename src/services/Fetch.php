@@ -207,7 +207,7 @@ class Fetch extends Component
                 {
                     if (isset($matches[4]))
                     {
-                        $decodedJSON['date'] = DateTime::createFromString($matches[4]);
+                        $decodedJSON['date'] = \DateTime::createFromFormat(DATE_ATOM,$matches[4]);
                     }
                 }
             }
