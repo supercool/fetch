@@ -36,7 +36,7 @@ class Fetch extends Component
         }
 
         // Check cache first
-        $cache = Craft::$app->getCache();
+        $cache = false;//Craft::$app->getCache();
         $cached = $cache->get('fetch.'.$url);
 
         if ($cached)
@@ -134,23 +134,42 @@ class Fetch extends Component
                 ];
             }
 
-            // create curl resource
-            $ch = curl_init();
+            //if this is youtube, let's not make an AJAX request
+            if($provider === "youtube") {
+                $url = parse_url($url);
 
-            // set url
-            curl_setopt($ch, CURLOPT_URL, $apiUrl);
+                if($url['host'] === "www.youtube.com") {
+                    //the code is a query string
+                    $code = str_replace('v=', '', $url['query']);
+                } else {
+                    //the code is the path
+                    $code = str_replace('/', '', $url['path']);
+                }
 
-            //return the transfer as a string
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                $decodedJSON = [
+                    'html' => '<iframe width="480" height="270" src="https://www.youtube.com/embed/' . $code . '?wmode=transparent" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+                    'thumbnail_url' => "https://i.ytimg.com/vi/{$code}/hqdefault.jpg",
+                    'youtube_id' => $code
+                ];
+            } else {
+                // create curl resource
+                $ch = curl_init();
 
-            // $output contains the output string
-            $output = curl_exec($ch);
+                // set url
+                curl_setopt($ch, CURLOPT_URL, $apiUrl);
 
-            // close curl resource to free up system resources
-            curl_close($ch);
+                //return the transfer as a string
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-            // decode returned json
-            $decodedJSON = json_decode($output, true);
+                // $output contains the output string
+                $output = curl_exec($ch);
+
+                // close curl resource to free up system resources
+                curl_close($ch);
+
+                // decode returned json
+                $decodedJSON = json_decode($output, true);
+            }
 
             // see if we have any html
             if ( $provider === 'flickr' || $provider === 'pinterest' )
@@ -212,23 +231,23 @@ class Fetch extends Component
                 }
             }
 
-            // Youtube mods
-            if ( $provider === 'youtube' )
-            {
-                // Add youtube ID
-                preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?#&\"'>]+)/", $url, $matches);
-
-                if (isset($matches[1])) {
-                    $decodedJSON['youtube_id'] = $matches[1];
-                }
-
-                // Modify the url in the iframe to add &wmode=transparent
-                if (isset($html))
-                {
-                    $html = preg_replace('/src\=\\"(.*?)\\"(.*?)/i', 'src="$1$2&wmode=transparent"$3', $html);
-                    $decodedJSON['html'] = $html;
-                }
-            }
+//            // Youtube mods
+//            if ( $provider === 'youtube' )
+//            {
+//                // Add youtube ID
+//                preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?#&\"'>]+)/", $url, $matches);
+//
+//                if (isset($matches[1])) {
+//                    $decodedJSON['youtube_id'] = $matches[1];
+//                }
+//
+//                // Modify the url in the iframe to add &wmode=transparent
+//                if (isset($html))
+//                {
+//                    $html = preg_replace('/src\=\\"(.*?)\\"(.*?)/i', 'src="$1$2&wmode=transparent"$3', $html);
+//                    $decodedJSON['html'] = $html;
+//                }
+//            }
 
             // check we haven't any errors or 404 etc
             if ( !isset($html) || strpos($html, '<html') !== false || isset($decodedJSON['errors']) || strpos($html, 'Not Found') !== false )
@@ -251,7 +270,7 @@ class Fetch extends Component
                 ];
 
                 // Cache and return
-                $cache->set('fetch.'.$url, $return);
+                //$cache->set('fetch.'.$url, $return);
                 return $return;
             }
         }
