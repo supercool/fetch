@@ -36,8 +36,8 @@ class Fetch extends Component
         }
 
         // Check cache first
-        $cache = false;//Craft::$app->getCache();
-        $cached = $cache->get('fetch.'.$url);
+        $cache = Craft::$app->getCache();
+        $cached = false;//$cache->get('fetch.'.$url);
 
         if ($cached)
         {
