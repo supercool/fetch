@@ -126,6 +126,10 @@ class FetchField extends Field
      */
     public function serializeValue($value, ElementInterface $element = null)
     {
+        if(is_object($value)) {
+            $value = $value->url;
+        }
+
         $value = trim($value);
 
         if ( ! empty($value) )
