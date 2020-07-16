@@ -10,3 +10,12 @@
     errors: settings.getErrors('embedlyApiKey')
   }) }}
 </div>
+
+{{ forms.lightswitchField({
+  label: "Validate URL's on element save",
+  instructions: "When disabled, elements will be able to save even if the link is invalid, or the service is non-responsive.",
+  id: "validateUrlsOnSave",
+  name: "validateUrlsOnSave",
+  errors: settings.getErrors('validateUrlsOnSave'),
+  on: settings.validateUrlsOnSave
+}) }}

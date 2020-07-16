@@ -16,11 +16,13 @@ use craft\base\Model;
 class Settings extends Model
 {
     public $embedlyApiKey;
+    public $validateUrlsOnSave = true;
 
     public function rules()
     {
         return [
             [['embedlyApiKey'], 'string'],
+            [['validateUrlsOnSave'], 'boolean']
         ];
     }
 }

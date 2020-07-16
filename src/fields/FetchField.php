@@ -26,6 +26,45 @@ use supercool\fetch\assetbundles\FetchAsset;
 class FetchField extends Field
 {
 
+    //  Properties
+    // =========================================================================
+
+    /**
+     * @var bool  - Whether Flickr links are allowed for this field
+     */
+    public $allowFlickr = true;
+
+    /**
+     * @var bool - Whether Instagram links are allowed for this field
+     */
+    public $allowInstagram = true;
+
+    /**
+     * @var bool - Whether Pintrest links are allowed for this field
+     */
+    public $allowPintrest = true;
+
+    /**
+     * @var bool - Whether Soundcloud links are allowed for this field
+     */
+    public $allowSoundcloud = true;
+
+    /**
+     * @var bool - Whether Twitter links are allowed for this field
+     */
+    public $allowTwitter = true;
+
+    /**
+     * @var bool - Whether vimeo links are allowed for this field
+     */
+    public $allowVimeo = true;
+
+    /**
+     * @var bool - Whether youtube links are allowed for this field
+     */
+    public $allowYoutube = true;
+
+
     // Static Methods
     // =========================================================================
 
@@ -56,7 +95,32 @@ class FetchField extends Field
     public function rules()
     {
         $rules = parent::rules();
+
+        $booleanFields = [
+            'allowFlickr', 'allowInstagram', 'allowPintrest', 'allowSoundcloud',
+            'allowTwitter', 'allowVimeo', 'allowYoutube'
+        ];
+
+        $rules[] = [$booleanFields, 'boolean'];
+
         return $rules;
+    }
+
+    /**
+     * @return string|null
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     * @throws \yii\base\Exception
+     */
+    public function getSettingsHtml()
+    {
+        return Craft::$app->getView()->renderTemplate(
+            'fetch/field/_settings.twig',
+            [
+                'field' => $this,
+            ]
+        );
     }
 
 
