@@ -15,13 +15,17 @@ use craft\base\Model;
 
 class Settings extends Model
 {
-    public $embedlyApiKey;
+    /**
+     * @var bool
+     */
     public $validateUrlsOnSave = true;
 
+    /**
+     * @inheritDoc
+     */
     public function rules()
     {
         return [
-            [['embedlyApiKey'], 'string'],
             [['validateUrlsOnSave'], 'boolean']
         ];
     }

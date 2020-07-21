@@ -73,9 +73,14 @@ Craft.Fetch = Garnish.Base.extend(
         {
           this.setSuccess(data.html);
         }
-        else
+        else if (!data.validationDisabled)
         {
           this.setError(data.error);
+        }
+        else
+        {
+          // If we get here, validation is disabled so we just hide the spinner
+          this.$spinner.addClass('hidden');
         }
       }, this));
 

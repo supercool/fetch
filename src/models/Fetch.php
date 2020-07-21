@@ -15,7 +15,7 @@ use craft\base\Model;
 use craft\helpers\Template as TemplateHelper;
 
 use supercool\fetch\Fetch as FetchPlugin;
-use supercool\fetch\validators\FetchValidator;
+use supercool\fetch\fields\FetchField;
 
 class Fetch extends Model
 {
@@ -27,6 +27,11 @@ class Fetch extends Model
      * @var
      */
     public $url;
+
+    /**
+     * @var FetchField
+     */
+    public $field;
 
     /**
      * @var
@@ -41,7 +46,7 @@ class Fetch extends Model
     /**
      * Use the plain url as the string representation.
      *
-     * @return \Twig_Markup
+     * @return \Twig\Markup
      */
     public function __toString()
     {
@@ -52,7 +57,7 @@ class Fetch extends Model
     /**
      * Returns the embed code as a Twig_Markup
      *
-     * @return \Twig_Markup
+     * @return \Twig\Markup
      */
     public function getTwig()
     {
@@ -80,7 +85,6 @@ class Fetch extends Model
         return $this->_getObject();
     }
 
-
     /**
      * Returns the provider
      *
@@ -89,6 +93,16 @@ class Fetch extends Model
     public function getProvider()
     {
         return $this->_getProvider();
+    }
+
+    public function getSuccess()
+    {
+        return $this->_getSuccess();
+    }
+
+    public function getErrorMessage()
+    {
+        return $this->_getErrorMessage();
     }
 
 
@@ -100,8 +114,25 @@ class Fetch extends Model
     public function rules()
     {
         $rules = parent::rules();
-        $rules[] = ['url', FetchValidator::class];
+        $rules[] = ['url', 'validateUrl'];
         return $rules;
+    }
+
+    public function validateUrl($value)
+    {
+        if ( ! empty($value) )
+        {
+            // process it
+            $result = FetchPlugin::$plugin->getFetch()->get($value, $this->field);
+
+            // if it didn’t work, spit back the error message
+            if ( $result['success'] === false )
+            {
+                $message = $result['error'];
+                $this->addError($value, $message);
+            }
+
+        }
     }
 
 
@@ -112,7 +143,7 @@ class Fetch extends Model
     {
         if (!isset($this->_result))
         {
-          $this->_result = FetchPlugin::$plugin->getFetch()->get($this->url);
+          $this->_result = FetchPlugin::$plugin->getFetch()->get($this->url, $this->field);
         }
 
         return $this->_result['html'];
@@ -123,7 +154,7 @@ class Fetch extends Model
     {
         if (!isset($this->_result))
         {
-          $this->_result = FetchPlugin::$plugin->getFetch()->get($this->url);
+          $this->_result = FetchPlugin::$plugin->getFetch()->get($this->url, $this->field);
         }
 
         return $this->_result['object'];
@@ -134,10 +165,36 @@ class Fetch extends Model
     {
         if (!isset($this->_result))
         {
-          $this->_result = FetchPlugin::$plugin->getFetch()->get($this->url);
+          $this->_result = FetchPlugin::$plugin->getFetch()->get($this->url, $this->field);
         }
 
         return $this->_result['provider'];
     }
 
+    private function _getSuccess()
+    {
+        if (!isset($this->_result))
+        {
+            $this->_result = FetchPlugin::$plugin->getFetch()->get($this->url, $this->field);
+        }
+
+        return $this->_result['success'];
+    }
+
+    private function _getErrorMessage()
+    {
+        {
+            if (!isset($this->_result))
+            {
+                $this->_result = FetchPlugin::$plugin->getFetch()->get($this->url, $this->field);
+            }
+
+            if($this->_result['success'])
+            {
+                return null;
+            }
+
+            return $this->_result['error'];
+        }
+    }
 }

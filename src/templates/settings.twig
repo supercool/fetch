@@ -1,16 +1,5 @@
 {% import "_includes/forms" as forms %}
 
-<div class="item" data-colspan="1">
-  {{ forms.textField({
-    first: true,
-    label: 'Embed.ly API Key'|t('fetch'),
-    id: 'embedlyApiKey',
-    name: 'embedlyApiKey',
-    value: settings.embedlyApiKey,
-    errors: settings.getErrors('embedlyApiKey')
-  }) }}
-</div>
-
 {{ forms.lightswitchField({
   label: "Validate URL's on element save",
   instructions: "When disabled, elements will be able to save even if the link is invalid, or the service is non-responsive.",
