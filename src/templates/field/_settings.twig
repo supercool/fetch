@@ -1,0 +1,63 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.field({
+    label: "Link Types",
+    instructions: "Select the link types to allow",
+    first: true
+}) }}
+
+{{ forms.lightswitchField({
+    label: "Flickr links",
+    id: "allowFlickr",
+    name: "allowFlickr",
+    errors: field.getErrors('allowFlickr'),
+    on: field.allowFlickr
+}) }}
+
+{{ forms.lightswitchField({
+    label: "Instagram links",
+    id: "allowInstagram",
+    name: "allowInstagram",
+    errors: field.getErrors('allowInstagram'),
+    on: field.allowInstagram
+}) }}
+
+{{ forms.lightswitchField({
+    label: "Pintrest links",
+    id: "allowPintrest",
+    name: "allowPintrest",
+    errors: field.getErrors('allowPintrest'),
+    on: field.allowPintrest
+}) }}
+
+{{ forms.lightswitchField({
+    label: "Soundcloud links",
+    id: "allowSoundcloud",
+    name: "allowSoundcloud",
+    errors: field.getErrors('allowSoundcloud'),
+    on: field.allowSoundcloud
+}) }}
+
+{{ forms.lightswitchField({
+    label: "Twitter links",
+    id: "allowTwitter",
+    name: "allowTwitter",
+    errors: field.getErrors('allowTwitter'),
+    on: field.allowTwitter
+}) }}
+
+{{ forms.lightswitchField({
+    label: "Vimeo links",
+    id: "allowVimeo",
+    name: "allowVimeo",
+    errors: field.getErrors('allowVimeo'),
+    on: field.allowVimeo
+}) }}
+
+{{ forms.lightswitchField({
+    label: "Youtube links",
+    id: "allowYoutube",
+    name: "allowYoutube",
+    errors: field.getErrors('allowYoutube'),
+    on: field.allowYoutube
+}) }}

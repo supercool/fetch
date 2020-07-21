@@ -34,6 +34,9 @@ class Fetch extends Plugin
     // Static Properties
     // =========================================================================
 
+    /**
+     * @var Plugin
+     */
     public static $plugin;
 
 
@@ -76,7 +79,7 @@ class Fetch extends Plugin
      */
     protected function settingsHtml()
     {
-        return \Craft::$app->getView()->renderTemplate('fetch/settings', [
+        return Craft::$app->getView()->renderTemplate('fetch/settings', [
             'settings' => $this->getSettings()
         ]);
     }
@@ -84,6 +87,8 @@ class Fetch extends Plugin
 
     /**
      * @return Entries
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\InvalidConfigException
      */
     public function getFetch()
     {

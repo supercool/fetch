@@ -12,27 +12,34 @@
 namespace supercool\fetch\services;
 
 use Craft;
+use supercool\fetch\fields\FetchField;
 use yii\base\Component;
 
 use supercool\fetch\Fetch as FetchPlugin;
 
 class Fetch extends Component
 {
+    public static $PROVIDER_FLICKR = 2;
+    public static $PROVIDER_INSTAGRAM = 3;
+    public static $PROVIDER_SOUNDCLOUD = 4;
+    public static $PROVIDER_TWITTER = 5;
+    public static $PROVIDER_VIMEO = 6;
+    public static $PROVIDER_YOUTUBE = 7;
+    public static $PROVIDER_DISABLED_FOR_FIELD = 500;
+    public static $PROVIDER_UNSUPPORTED = 1000;
 
-    private $settings = '';
-
-    public function __construct()
-    {
-        // get plugin settings
-        $plugin = FetchPlugin::$plugin;
-        $this->settings = $plugin->getSettings();
-    }
-
-
-    public function get($url, $scripts = true)
+    /**
+     * Fetch the embed for a given url value
+     *
+     * @param $url
+     * @param FetchField $field
+     * @param bool $scripts
+     * @return array|bool|null
+     */
+    public function get($url, FetchField $field, $scripts = true)
     {
         if (!$url) {
-            return;
+            return null;
         }
 
         // Check cache first
@@ -54,198 +61,143 @@ class Fetch extends Component
                 $url = 'http://' . $url;
             }
 
-            // prep
-            $apiUrl = '';
-            $provider = '';
+            $provider = $this->getProvider($url, $field);
 
-            if ( $this->settings['embedlyApiKey'] != '' )
-            {
-                $embedlyApiKey = $this->settings['embedlyApiKey'];
-            }
-            else
-            {
-                $embedlyApiKey = false;
+            if($provider === $this::$PROVIDER_DISABLED_FOR_FIELD) {
+                return $this->getErrorResponse(
+                    Craft::t("fetch", "Sorry, that service has been disabled for this field"),
+                    $url,
+                    $scripts
+                );
             }
 
-            // switch on the provider, starting with vimeo
-            if ( strpos($url, 'vimeo') !== false )
-            {
-                $provider = 'vimeo';
-                $apiUrl = 'https://vimeo.com/api/oembed.json?url='.$url.'&byline=false&title=false&portrait=false&autoplay=false';
-            }
-            // twitter
-            elseif ( strpos($url, 'twitter') !== false )
-            {
-                $provider = 'twitter';
-                if ( $scripts ) {
-                    $apiUrl = 'https://api.twitter.com/1/statuses/oembed.json?url='.$url;
-                } else {
-                    $apiUrl = 'https://api.twitter.com/1/statuses/oembed.json?url='.$url.'&omit_script=true';
-                }
-            }
-            // youtube
-            elseif ( strpos($url, 'youtu') !== false )
-            {
-                $provider = 'youtube';
-                $apiUrl = 'https://www.youtube.com/oembed?url='.$url.'&format=json';
-                // add these params to the html after curling ?
-                // &modestbranding=1&rel=0&showinfo=0&autoplay=0
-            }
-            // flickr
-            elseif ( strpos($url, 'flickr') !== false )
-            {
-                $provider = 'flickr';
-                $apiUrl = 'https://www.flickr.com/services/oembed?url='.$url.'&format=json';
-            }
-            // soundcloud
-            elseif ( strpos($url, 'soundcloud') !== false )
-            {
-                $provider = 'soundcloud';
-                $apiUrl = 'https://soundcloud.com/oembed?url='.$url.'&format=json';
-            }
-            // instagram
-            elseif ( strpos($url, 'instagr') !== false )
-            {
-                $provider = 'instagram';
-
-                // Try and parse out the shortcode
-                if (preg_match("/(https?:)?\/\/(.*\.)?instagr(\.am|am\.com)\/p\/([^\/]*)/i", $url, $matches))
-                {
-                    if (isset($matches[4]))
-                    {
-                        $shortcode = $matches[4];
-                        $url = "https://www.instagram.com/p/{$shortcode}/";
-                    }
-                }
-                $apiUrl = 'https://api.instagram.com/oembed/?url='.$url;
-            }
-            // pinterest
-            elseif ( strpos($url, 'pinterest') !== false && $embedlyApiKey )
-            {
-                $provider = 'pinterest';
-                $apiUrl = 'https://api.embed.ly/1/oembed?key='.$embedlyApiKey.'&url='.$url;
-            }
-            // unsupported service
-            else
-            {
-                return [
-                    'success' => false,
-                    'error' => Craft::t("fetch", "Sorry that service isn’t supported yet.")
-                ];
+            if($provider === $this::$PROVIDER_UNSUPPORTED) {
+                return $this->getErrorResponse(
+                    Craft::t("fetch", "Sorry that service isn’t supported yet."),
+                    $url,
+                    $scripts
+                );
             }
 
-            // create curl resource
-            $ch = curl_init();
+            try {
+                $data = $this->getOembedResponse($url, $provider, $scripts);
+            }
+            catch (\Throwable $e) {
 
-            // set url
-            curl_setopt($ch, CURLOPT_URL, $apiUrl);
+                Craft::error($e->getMessage(), FetchPlugin::$plugin->handle);
 
-            //return the transfer as a string
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-            // $output contains the output string
-            $output = curl_exec($ch);
-
-            // close curl resource to free up system resources
-            curl_close($ch);
-
-            // decode returned json
-            $decodedJSON = json_decode($output, true);
+                return $this->getErrorResponse(
+                    Craft::t("fetch", "There was an issue getting a response from the provider."),
+                    $url,
+                    $scripts
+                );
+            }
 
             // see if we have any html
-            if ( $provider === 'flickr' || $provider === 'pinterest' )
+            if ( $provider === $this::$PROVIDER_FLICKR)
             {
-                if ( isset($decodedJSON['url']) && $decodedJSON['type'] == 'photo' )
+                if ( isset($data['url']) && $data['type'] == 'photo' )
                 {
-                    $html = '<img src="'.$decodedJSON['url'].'" width="'.$decodedJSON['width'].'" height="'.$decodedJSON['height'].'" class="fetch fetch--'.$provider.'">';
+                    $html = '<img alt="' . $data['title'] . ' (Flickr image)"' .
+                        ' src="' . $data['url'] .
+                        '" width="' . $data['width'] .
+                        '" height="' . $data['height'] .
+                        '" class="fetch fetch--'.$this->getProviderString($provider).'">';
                 }
                 else
                 {
-                    return array(
-                        'success' => false,
-                        'error' => Craft::t("fetch", "Sorry that image didn’t seem to work.")
-                    );
+                    return $this->getErrorResponse(
+                        Craft::t("fetch", "Sorry that image didn’t seem to work."),
+                        $url,
+                        $scripts);
                 }
             }
             else
             {
-                if ( isset($decodedJSON['html']) && ( ctype_space($decodedJSON['html']) === false || $decodedJSON['html'] !== '' ) )
+                if ( isset($data['html']) && ( ctype_space($data['html']) === false || $data['html'] !== '' ) )
                 {
-                    $html = '<div class="fetch  fetch--'.$provider.'">'.$decodedJSON['html'].'</div>';
+                    $html = '<div class="fetch  fetch--'.$this->getProviderString($provider).'">'.$data['html'].'</div>';
+
+                    $html = preg_replace(
+                        '/(?:<iframe([^>]*)>)/',
+                        '<iframe title="' . $this->getProviderString($provider) . ' embed" $1 >',
+                        $html,
+                        1
+                    );
                 }
                 else
                 {
-                    return array(
-                        'success' => false,
-                        'error' => Craft::t("fetch", "Sorry that url didn’t seem to work.")
+                    return $this->getErrorResponse(
+                        Craft::t("fetch", "Sorry that url didn’t seem to work."),
+                        $url,
+                        $scripts
                     );
                 }
             }
             // Instagram mods
-            if ( $provider === 'instagram' )
+            if ( $provider === $this::$PROVIDER_INSTAGRAM )
             {
                 // Shortcode and media url
-                $decodedJSON['shortcode'] = false;
+                $data['shortcode'] = false;
 
-                if (isset($shortcode))
+                // Try and parse out the shortcode
+                preg_match("/(https?:)?\/\/(.*\.)?instagr(\.am|am\.com)\/p\/([^\/]*)/i", $url, $matches);
+                if (isset($matches[4]))
                 {
-                    $decodedJSON['thumbnail_url'] = "https://instagram.com/p/{$shortcode}/media/";
-                    $decodedJSON['shortcode'] = $shortcode;
+                    $data['thumbnail_url'] = "https://instagram.com/p/{$matches[4]}/media/";
+                    $data['shortcode'] = $matches[4];
                 }
-                else
+                else if (!isset($data['thumbnail_url']))
                 {
-                    if (!isset($decodedJSON['thumbnail_url']))
-                    {
-                        $decodedJSON['thumbnail_url'] = false;
-                    }
+                    $data['thumbnail_url'] = false;
                 }
 
                 // Date it was posted
-                $decodedJSON['date'] = false;
+                $data['date'] = false;
 
-                if(preg_match("/(datetime\=)(.*)(\")(.*)(\")(.*)/i", $html, $matches))
+                preg_match("/(datetime=)(.*)(\")(.*)(\")(.*)/i", $html, $matches);
+                if (isset($matches[4]))
                 {
-                    if (isset($matches[4]))
-                    {
-                        $decodedJSON['date'] = \DateTime::createFromFormat(DATE_ATOM,$matches[4]);
-                    }
+                    $data['date'] = \DateTime::createFromFormat(DATE_ATOM,$matches[4]);
                 }
+
             }
 
             // Youtube mods
-            if ( $provider === 'youtube' )
+            if ( $provider === $this::$PROVIDER_YOUTUBE )
             {
                 // Add youtube ID
                 preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?#&\"'>]+)/", $url, $matches);
 
                 if (isset($matches[1])) {
-                    $decodedJSON['youtube_id'] = $matches[1];
+                    $data['youtube_id'] = $matches[1];
                 }
 
                 // Modify the url in the iframe to add &wmode=transparent
                 if (isset($html))
                 {
                     $html = preg_replace('/src\=\\"(.*?)\\"(.*?)/i', 'src="$1$2&wmode=transparent"$3', $html);
-                    $decodedJSON['html'] = $html;
+                    $data['html'] = $html;
                 }
             }
 
             // check we haven't any errors or 404 etc
-            if ( !isset($html) || strpos($html, '<html') !== false || isset($decodedJSON['errors']) || strpos($html, 'Not Found') !== false )
+            if ( !isset($html) || strpos($html, '<html') !== false || isset($data['errors']) || strpos($html, 'Not Found') !== false )
             {
                 // Don’t cache ones that didn’t work
-                return [
-                    'success' => false,
-                    'error' => Craft::t("fetch", "Sorry content for that url couldn’t be found.")
-                ];
+                return $this->getErrorResponse(
+                    Craft::t("fetch", "Sorry content for that url couldn’t be found."),
+                    $url,
+                    $scripts
+                );
             }
             else
             {
                 $return = [
                     'success'  => true,
                     'url'      => $url,
-                    'provider' => $provider,
-                    'object'   => $decodedJSON,
+                    'provider' => $this->getProviderString($provider),
+                    'object'   => $data,
                     'html'     => $html,
                     'scripts'  => $scripts
                 ];
@@ -255,6 +207,200 @@ class Fetch extends Component
                 return $return;
             }
         }
+    }
+
+    /**
+     * Works out the provider of a given url, and returns a constant appropriate for it.
+     * Can also return two 'error' const's, one for the provider being disabled in the field settings
+     * and one for the provider being unknown
+     *
+     * @param string $url
+     * @param FetchField $field
+     * @return int
+     */
+    protected function getProvider(string $url, FetchField $field) {
+
+        if ( strpos($url, 'vimeo') !== false )
+        {
+            $provider = $field->allowVimeo ? $this::$PROVIDER_VIMEO : $this::$PROVIDER_DISABLED_FOR_FIELD;
+        }
+        elseif ( strpos($url, 'twitter') !== false )
+        {
+            $provider = $field->allowTwitter ? $this::$PROVIDER_TWITTER : $this::$PROVIDER_DISABLED_FOR_FIELD;
+        }
+        elseif ( strpos($url, 'youtu') !== false )
+        {
+            $provider = $field->allowYoutube ? $this::$PROVIDER_YOUTUBE : $this::$PROVIDER_DISABLED_FOR_FIELD;
+        }
+        elseif ( strpos($url, 'flickr') !== false )
+        {
+            $provider = $field->allowFlickr ? $this::$PROVIDER_FLICKR : $this::$PROVIDER_DISABLED_FOR_FIELD;
+        }
+        elseif ( strpos($url, 'soundcloud') !== false )
+        {
+            $provider = $field->allowSoundcloud ? $this::$PROVIDER_SOUNDCLOUD : $this::$PROVIDER_DISABLED_FOR_FIELD;
+        }
+        elseif ( strpos($url, 'instagr') !== false )
+        {
+            $provider = $field->allowInstagram ?  $this::$PROVIDER_INSTAGRAM : $this::$PROVIDER_DISABLED_FOR_FIELD;
+        }
+        else
+        {
+            $provider = $this::$PROVIDER_UNSUPPORTED;
+        }
+
+        return $provider;
+    }
+
+    /**
+     * Gets the data from oembed for the passed in url and provider, returning data as an associative array
+     *
+     * @param $url
+     * @param $provider
+     * @param $includeScripts
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function getOembedResponse(&$url, $provider, $includeScripts)
+    {
+        switch ($provider) {
+            case $this::$PROVIDER_FLICKR:
+                $apiUrl = 'https://www.flickr.com/services/oembed?url='.$url.'&format=json';
+                break;
+
+            case $this::$PROVIDER_INSTAGRAM:
+                // Try and parse out the shortcode
+                if (preg_match("/(https?:)?\/\/(.*\.)?instagr(\.am|am\.com)\/p\/([^\/]*)/i", $url, $matches))
+                {
+                    if (isset($matches[4]))
+                    {
+                        $url = "https://www.instagram.com/p/{$matches[4]}/";
+                    }
+                }
+
+                $apiUrl = 'https://api.instagram.com/oembed/?url='.$url;
+
+                break;
+
+            case $this::$PROVIDER_SOUNDCLOUD:
+                $apiUrl = 'https://soundcloud.com/oembed?url='.$url.'&format=json';
+                break;
+
+            case $this::$PROVIDER_TWITTER:
+                if ($includeScripts) {
+                    $apiUrl = 'https://api.twitter.com/1/statuses/oembed.json?url='.$url;
+                } else {
+                    $apiUrl = 'https://api.twitter.com/1/statuses/oembed.json?url='.$url.'&omit_script=true';
+                }
+
+                break;
+
+            case $this::$PROVIDER_VIMEO:
+                $apiUrl = 'https://vimeo.com/api/oembed.json?url=' .
+                    $url . '&byline=false&title=false&portrait=false&autoplay=false';
+
+                break;
+
+            case $this::$PROVIDER_YOUTUBE:
+                $apiUrl = 'https://www.youtube.com/oembed?url='.$url.'&format=json';
+                break;
+
+            default:
+                // This should never be reached, as we are using constants,
+                // and the only non-cased constant will have already returned an error.
+                throw new \Exception("Invalid provider in fetch field: " . $provider);
+        }
+
+        return $this->getApiData($apiUrl);
+    }
+
+    /**
+     * @param $provider - Constant format of providers
+     * @return string
+     */
+    protected function getProviderString($provider)
+    {
+        switch ($provider) {
+            case $this::$PROVIDER_FLICKR:
+                return "flickr";
+                break;
+
+            case $this::$PROVIDER_INSTAGRAM:
+                return "instagram";
+
+                break;
+
+            case $this::$PROVIDER_SOUNDCLOUD:
+                return "soundcloud";
+                break;
+
+            case $this::$PROVIDER_TWITTER:
+                return "twitter";
+
+                break;
+
+            case $this::$PROVIDER_VIMEO:
+                return "vimeo";
+
+                break;
+
+            case $this::$PROVIDER_YOUTUBE:
+                return "youtube";
+                break;
+
+            default:
+                // This should never be reached, as we are using constants,
+                // and the only non-cased constant will have already returned an error.
+                return "";
+                break;
+        }
+    }
+
+    /**
+     * Makes a curl request to the provided api url, and returns the response (json decoded)
+     *
+     * @param string $apiUrl
+     * @return mixed
+     */
+    protected function getApiData(string $apiUrl) {
+        // create curl resource
+        $ch = curl_init();
+
+        // set url
+        curl_setopt($ch, CURLOPT_URL, $apiUrl);
+
+        //return the transfer as a string
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+        // $output contains the output string
+        $output = curl_exec($ch);
+
+        // close curl resource to free up system resources
+        curl_close($ch);
+
+        // decode returned json
+        return json_decode($output, true);
+    }
+
+    /**
+     * Gets the array to return on error, to ensure consistent format across all error returns
+     *
+     * @param string $errorMessage
+     * @param string $url
+     * @param bool $scripts
+     * @return array
+     */
+    protected function getErrorResponse(string $errorMessage, string $url, bool $scripts)
+    {
+        return [
+            'success' => false,
+            'error' => $errorMessage,
+            'url' => $url,
+            'provider' => null,
+            'object' => null,
+            'html' => '',
+            'scripts' => $scripts
+        ];
     }
 
 }

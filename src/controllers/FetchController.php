@@ -15,6 +15,7 @@ use Craft;
 use craft\web\Controller as BaseController;
 
 use supercool\fetch\Fetch;
+use supercool\fetch\fields\FetchField;
 
 class FetchController extends BaseController
 {
@@ -25,12 +26,16 @@ class FetchController extends BaseController
         $this->requirePostRequest();
         $this->requireAcceptsJson();
 
+        if(Craft::$app->request->getIsCpRequest() && !Fetch::$plugin->getSettings()->validateUrlsOnSave) {
+            return $this->asJson(['success' => false, 'validationDisabled' => true]);
+        }
+
         // grab url
         $request = Craft::$app->getRequest();
         $url = $request->getBodyParam('url');
 
         // return result as json
-        return $this->asJson( Fetch::$plugin->getFetch()->get($url) );
+        return $this->asJson( array_merge(Fetch::$plugin->getFetch()->get($url, new FetchField()), ['validationDisabled' => false]) );
     }
 
 }

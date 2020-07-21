@@ -14,10 +14,8 @@ namespace supercool\fetch\fields;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Field;
-use craft\helpers\Db;
 use yii\db\Schema;
 use craft\helpers\Json;
-use craft\helpers\Template;
 
 use supercool\fetch\Fetch;
 use supercool\fetch\models\Fetch as FetchModel;
@@ -25,6 +23,45 @@ use supercool\fetch\assetbundles\FetchAsset;
 
 class FetchField extends Field
 {
+
+    //  Properties
+    // =========================================================================
+
+    /**
+     * @var bool  - Whether Flickr links are allowed for this field
+     */
+    public $allowFlickr = true;
+
+    /**
+     * @var bool - Whether Instagram links are allowed for this field
+     */
+    public $allowInstagram = true;
+
+    /**
+     * @var bool - Whether Pintrest links are allowed for this field
+     */
+    public $allowPintrest = true;
+
+    /**
+     * @var bool - Whether Soundcloud links are allowed for this field
+     */
+    public $allowSoundcloud = true;
+
+    /**
+     * @var bool - Whether Twitter links are allowed for this field
+     */
+    public $allowTwitter = true;
+
+    /**
+     * @var bool - Whether vimeo links are allowed for this field
+     */
+    public $allowVimeo = true;
+
+    /**
+     * @var bool - Whether youtube links are allowed for this field
+     */
+    public $allowYoutube = true;
+
 
     // Static Methods
     // =========================================================================
@@ -56,7 +93,32 @@ class FetchField extends Field
     public function rules()
     {
         $rules = parent::rules();
+
+        $booleanFields = [
+            'allowFlickr', 'allowInstagram', 'allowPintrest', 'allowSoundcloud',
+            'allowTwitter', 'allowVimeo', 'allowYoutube'
+        ];
+
+        $rules[] = [$booleanFields, 'boolean'];
+
         return $rules;
+    }
+
+    /**
+     * @return string|null
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     * @throws \yii\base\Exception
+     */
+    public function getSettingsHtml()
+    {
+        return Craft::$app->getView()->renderTemplate(
+            'fetch/field/_settings.twig',
+            [
+                'field' => $this,
+            ]
+        );
     }
 
 
@@ -96,15 +158,10 @@ class FetchField extends Field
         {
             $model = new FetchModel;
             $model->url = $value;
+            $model->field = $this;
+            $model->validate();
 
-            if ( $model->validate() )
-            {
-                return $model;
-            }
-            else
-            {
-                return $value;
-            }
+            return $model;
         }
 
         return $value;
@@ -118,7 +175,7 @@ class FetchField extends Field
      *
      * If the method returns `false`, the query will be stopped before it ever gets a chance to execute.
      *
-     * @param ElementQueryInterface $query The element query
+     * @param ElementInterface $element The element
      * @param mixed                 $value The value that was set on this field’s corresponding [[ElementCriteriaModel]] param,
      *                                     if any.
      *
@@ -146,9 +203,16 @@ class FetchField extends Field
      *
      * @param mixed                 $value           The field’s value. This will either be the [[normalizeValue() normalized value]],
      *                                               raw POST data (i.e. if there was a validation error), or null
+     *
      * @param ElementInterface|null $element         The element the field is associated with, if there is one
      *
-     * @return string The input HTML.
+     * @return string
+     *
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     * @throws \yii\base\Exception
+     * @throws \yii\base\InvalidConfigException
      */
     public function getInputHtml($value, ElementInterface $element = null): string
     {
@@ -166,6 +230,38 @@ class FetchField extends Field
             'name'  => $name,
             'value' => $value
         ]);
+    }
+
+    /**
+     * @return array|string[]
+     */
+    public function getElementValidationRules(): array
+    {
+        if(Fetch::$plugin->getSettings()->validateUrlsOnSave) {
+            return ['validateUrlValue'];
+        }
+
+        return [];
+    }
+
+    /**
+     * @param ElementInterface $element
+     */
+    public function validateUrlValue(ElementInterface $element) {
+        $fieldValue = $element->getFieldValue($this->handle);
+
+        if ( ! empty($fieldValue) ) {
+            $model = new FetchModel;
+            $model->url = $fieldValue;
+            $model->field = $this;
+
+            if (!$model->validate()) {
+                foreach ($model->getErrors('url') as $error) {
+                    $element->addError($this->handle, $error);
+                }
+            }
+        }
+
     }
 
 
