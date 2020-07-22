@@ -118,20 +118,19 @@ class Fetch extends Model
         return $rules;
     }
 
-    public function validateUrl($value)
+    public function validateUrl($attribute)
     {
-        if ( ! empty($value) )
+        if ( ! empty($this->$attribute) )
         {
             // process it
-            $result = FetchPlugin::$plugin->getFetch()->get($value, $this->field);
+            $result = FetchPlugin::$plugin->getFetch()->get($this->$attribute, $this->field);
 
             // if it didn’t work, spit back the error message
             if ( $result['success'] === false )
             {
                 $message = $result['error'];
-                $this->addError($value, $message);
+                $this->addError($attribute, $message);
             }
-
         }
     }
 
