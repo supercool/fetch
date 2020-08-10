@@ -46,11 +46,11 @@ class Fetch extends Model
     /**
      * Use the plain url as the string representation.
      *
-     * @return \Twig\Markup
+     * @return string
      */
     public function __toString()
     {
-        return $this->url;
+        return $this->url ? (string) $this->url : '';
     }
 
 
