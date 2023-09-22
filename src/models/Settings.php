@@ -23,7 +23,7 @@ class Settings extends Model
     /**
      * @inheritDoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['validateUrlsOnSave'], 'boolean']

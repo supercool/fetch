@@ -90,7 +90,7 @@ class FetchField extends Field
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         $rules = parent::rules();
 
@@ -111,7 +111,7 @@ class FetchField extends Field
      * @throws \Twig\Error\SyntaxError
      * @throws \yii\base\Exception
      */
-    public function getSettingsHtml()
+    public function getSettingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate(
             'fetch/field/_settings.twig',
@@ -152,7 +152,7 @@ class FetchField extends Field
      *
      * @return mixed The prepared field value
      */
-    public function normalizeValue($value, ElementInterface $element = null)
+    public function normalizeValue($value, ElementInterface $element = null): mixed
     {
         if ( ! empty($value) )
         {
@@ -181,7 +181,7 @@ class FetchField extends Field
      *
      * @return null|false `false` in the event that the method is sure that no elements are going to be found.
      */
-    public function serializeValue($value, ElementInterface $element = null)
+    public function serializeValue($value, ElementInterface $element = null): mixed
     {
         $value = trim($value);
 

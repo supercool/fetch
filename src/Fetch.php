@@ -68,7 +68,7 @@ class Fetch extends Plugin
     /**
      * @inhertdoc
      */
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?craft\base\Model
     {
         return new \supercool\fetch\models\Settings();
     }
@@ -77,7 +77,7 @@ class Fetch extends Plugin
     /**
      * @inheritdoc
      */
-    protected function settingsHtml()
+    protected function settingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate('fetch/settings', [
             'settings' => $this->getSettings()
