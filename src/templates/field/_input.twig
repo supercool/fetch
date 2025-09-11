@@ -1,19 +1,9 @@
-
-{#
-/**
- * Fetch plugin for Craft CMS
- *
- *  Field Settings
- *
- * @author    Supercool Ltd
- * @copyright Copyright (c) 2018 Supercool Ltd
- * @link      http://www.supercooldesign.co.uk/
- * @package   Fetch
- * @since     1.0.0
- */
-#}
+{% import "_includes/forms.twig" as forms %}
 
 <div id="{{ name }}" class="fetch">
-  <input class="text nicetext fullwidth" type="text" id="{{ name }}" name="{{ name }}" value="{{ value }}" autocomplete="off" placeholder="">
+	{{ forms.text({
+		id: name,
+		name: name,
+		value: value,
+	}) }}
 </div>
-<div class="clear"></div>

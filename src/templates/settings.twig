@@ -1,10 +1,11 @@
 {% import "_includes/forms" as forms %}
 
 {{ forms.lightswitchField({
-  label: "Validate URL's on element save",
-  instructions: "When disabled, elements will be able to save even if the link is invalid, or the service is non-responsive.",
-  id: "validateUrlsOnSave",
-  name: "validateUrlsOnSave",
+	first: true,
+  label: "Validate URL's on element save"|t('fetch'),
+  instructions: "When disabled, elements will be able to save even if the link is invalid, or the service is non-responsive."|t('fetch'),
+  id: 'validateUrlsOnSave',
+  name: 'validateUrlsOnSave',
   errors: settings.getErrors('validateUrlsOnSave'),
-  on: settings.validateUrlsOnSave
+  on: settings.validateUrlsOnSave,
 }) }}

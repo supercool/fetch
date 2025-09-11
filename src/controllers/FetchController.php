@@ -1,41 +1,34 @@
 <?php
 
-/**
- * Fetch plugin for Craft CMS 3.x
- *
- * A field type to embed videos for Craft CMS
- *
- * @link      http://www.supercooldesign.co.uk/
- * @copyright Copyright (c) 2018 Supercool Ltd
- */
-
 namespace supercool\fetch\controllers;
 
 use Craft;
-use craft\web\Controller as BaseController;
-
+use craft\web\Controller;
 use supercool\fetch\Fetch;
-use supercool\fetch\fields\FetchField;
+use Throwable;
+use yii\web\BadRequestHttpException;
+use yii\web\MethodNotAllowedHttpException;
+use yii\web\Response;
 
-class FetchController extends BaseController
+class FetchController extends Controller
 {
-
-    public function actionGet()
-    {
-        // only ajax post requests
+	/**
+	 * @throws BadRequestHttpException
+	 * @throws MethodNotAllowedHttpException
+	 */
+	public function actionFieldPreview(): ?Response
+	{
         $this->requirePostRequest();
         $this->requireAcceptsJson();
 
-        if(Craft::$app->request->getIsCpRequest() && !Fetch::$plugin->getSettings()->validateUrlsOnSave) {
-            return $this->asJson(['success' => false, 'validationDisabled' => true]);
-        }
+        $url = Craft::$app->getRequest()->getRequiredBodyParam('url');
 
-        // grab url
-        $request = Craft::$app->getRequest();
-        $url = $request->getBodyParam('url');
+		try {
+			$response = Fetch::getInstance()->getFetch()->getProviderOembedResponse($url);
+		} catch (Throwable) {
+			return $this->asFailure();
+		}
 
-        // return result as json
-        return $this->asJson( array_merge(Fetch::$plugin->getFetch()->get($url, new FetchField()), ['validationDisabled' => false]) );
+		return $this->asSuccess(data: $response);
     }
-
 }

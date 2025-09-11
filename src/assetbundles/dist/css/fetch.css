@@ -1,71 +1,37 @@
 .fetch {
-  position: relative;
-}
-.fetch > .spinner {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-.fetch > .error,
-.fetch > .success {
-  position: absolute;
-  top: 6px;
-  right: 6px;
+	position: relative;
 }
 
-.fetch-errors {
-  margin: 1em 0;
+.fetch .text:not(.color-input) {
+	padding-inline-end: 40px;
+}
+
+.fetch > .spinner,
+.fetch > .error,
+.fetch > .success {
+	position: absolute;
+	inset-block-start: 0;
+	inset-inline-end: 9px;
+	display: grid;
+	place-items: center;
+	height: var(--input-height);
 }
 
 .fetch-preview {
-  margin-top: 15px;
-  background: #ffffff url(../images/spinner.gif) no-repeat 50% 50%;
+	position: relative;
+	margin-top: 15px;
+	background-color: var(--gray-050);
+	aspect-ratio: calc(var(--width) / var(--height));
+	border-radius: var(--input-border-radius);
+	overflow-y: auto;
+	overscroll-behavior: contain;
 
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-
-  -webkit-box-shadow: 0 0 2px rgba(51, 170, 255, 0), inset 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 2px 5px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(51, 170, 255, 0);
-  -moz-box-shadow: 0 0 2px rgba(51, 170, 255, 0), inset 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 2px 5px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(51, 170, 255, 0);
-  box-shadow: 0 0 2px rgba(51, 170, 255, 0), inset 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 2px 5px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(51, 170, 255, 0);
+	iframe {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
 }
 
-/* force the content to be fluid */
-.fetch-preview .fetch > * {
-  display: block;
-  width: 100% !important;
-}
-
-
-/* tweets */
-.fetch-preview .fetch--twitter > * {}
-
-
-/* instagram */
-.fetch-preview .fetch--instagram > * {
-  max-width: 100% !important;
-}
-
-
-/* flickr */
-.fetch-preview .fetch--flickr {
-  max-width: 100%;
-  height: auto !important;
-}
-
-
-/* videos, assume they are all 16:9 */
-.fetch-preview .fetch--youtube,
-.fetch-preview .fetch--vimeo {
-  position: relative;
-  padding-bottom: 56.25%; // 16:9
-  height: 0;
-}
-.fetch-preview .fetch--youtube > *,
-.fetch-preview .fetch--vimeo > * {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}

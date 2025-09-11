@@ -1,133 +1,79 @@
-/**
- * @author    Supercool Ltd <naveed@supercooldesign.co.uk>
- * @copyright Copyright (c) 2018, Supercool Ltd
- * @see       http://supercooldesign.co.uk
- */
+// noinspection JSVoidFunctionReturnValueUsed
 
-(function($){
+(function($) {
+	Craft.Fetch = Garnish.Base.extend({
+		id: null,
+		refreshTimeout: null,
+		$elem: null,
+		$input: null,
+		$spinner: null,
+		$error: null,
+		$success: null,
+		$preview: null,
 
-/**
- * Fetch Class
- */
+		init: function (id) {
+			this.id = id;
+			this.$elem = $('#' + this.id);
+			this.$input = this.$elem.find('input');
+			this.$spinner = $('<div class="spinner hidden" />').appendTo(this.$elem);
+			this.$success = $('<div class="success hidden" data-icon="check" />').appendTo(this.$elem);
+			this.$error = $('<div class="error hidden" data-icon="alert" />').appendTo(this.$elem);
+			this.$preview = $('<div class="fetch-preview hidden" />').appendTo(this.$elem);
 
-Craft.Fetch = Garnish.Base.extend(
-{
+			this.refreshPreview();
+			this.addListener(this.$input, 'input', 'refreshPreview');
+		},
 
-  id: null,
-  refreshTimout: null,
+		refreshPreview: function () {
+			if (this.refreshTimeout) {
+				clearTimeout(this.refreshTimeout);
+			}
 
-  $elem: null,
-  $input: null,
-  $spinner: null,
-  $error: null,
-  $success: null,
-  $preview: null,
+			this.refreshTimeout = setTimeout(() => this.getPreview(), 500);
+		},
 
-  init: function(id)
-  {
+		getPreview: function () {
+			if (this.$input.val() === '') {
+				this.$preview.addClass('hidden').html('');
+			} else {
+				this.setWorking();
 
-    this.id = id;
-    this.$elem = $('#'+this.id);
-    this.$input = this.$elem.find('input');
-    this.$spinner = $('<div class="spinner hidden" />').appendTo(this.$elem);
-    this.$success = $('<div class="success hidden" data-icon="check" />').appendTo(this.$elem);
-    this.$error = $('<div class="error hidden" data-icon="alert" />').appendTo(this.$elem);
-    this.$errorContainer = $('<div class="fetch-errors hidden" />').appendTo(this.$elem);
-    this.$preview = $('<div class="fetch-preview hidden" />').appendTo(this.$elem);
+				let data = {
+					url: this.$input.val()
+				};
 
-    this.addListener(this.$input, 'keyup', 'refreshPreview');
-    this.$input.trigger('keyup');
+				Craft.sendActionRequest('POST', 'fetch/fetch/field-preview', { data })
+					.then(response => {
+						if (response.data.html) {
+							this.setSuccess(response.data);
+						} else {
+							this.setError('An error occurred when fetching this content.');
+						}
+					})
+					.catch(error => {
+						this.setError(error?.response?.data?.message ?? 'An error occurred when fetching this content.');
+					})
+			}
+		},
 
-  },
+		setWorking: function() {
+			this.$error.addClass('hidden');
+			this.$success.addClass('hidden');
+			this.$spinner.removeClass('hidden');
+		},
 
-  refreshPreview: function()
-  {
+		setSuccess: function(data) {
+			this.$error.addClass('hidden');
+			this.$spinner.addClass('hidden');
+			this.$success.removeClass('hidden');
+			this.$preview.html(data.html).css({ '--width': data.width, '--height': data.height }).removeClass('hidden');
+		},
 
-    if (this.refreshTimout)
-    {
-      clearTimeout(this.refreshTimout);
-    }
-
-    this.refreshTimout = setTimeout($.proxy(function()
-    {
-      this.getPreview();
-    }, this), 1000);
-
-  },
-
-  getPreview: function()
-  {
-
-    if ( this.$input.val() !== '' )
-    {
-
-      this.setWorking();
-
-      var data = {
-        url : this.$input.val()
-      };
-
-      Craft.postActionRequest('fetch/fetch/get', data, $.proxy(function(data, textStatus, jqXHR)
-      {
-        if ( data.success )
-        {
-          this.setSuccess(data.html);
-        }
-        else if (!data.validationDisabled)
-        {
-          this.setError(data.error);
-        }
-        else
-        {
-          // If we get here, validation is disabled so we just hide the spinner
-          this.$spinner.addClass('hidden');
-        }
-      }, this));
-
-    }
-
-  },
-
-  setWorking: function()
-  {
-    // set icons
-    this.$spinner.removeClass('hidden');
-    this.$error.addClass('hidden');
-    this.$success.addClass('hidden');
-  },
-
-  setSuccess: function(html)
-  {
-
-    // set icons
-    this.$spinner.addClass('hidden');
-    this.$error.addClass('hidden');
-    this.$success.removeClass('hidden');
-
-    // clear errors and show html
-    this.$errorContainer.addClass('hidden').html('');
-    this.$preview.html(html).removeClass('hidden');
-
-  },
-
-  setError: function(error)
-  {
-
-    // set icons
-    this.$spinner.addClass('hidden');
-    this.$error.removeClass('hidden');
-    this.$success.addClass('hidden');
-
-    // clear native errors and show our error, even though they are likely
-    // to be the same error it means we can keep ours up-to-date
-    this.$elem.parent('.input').removeClass('errors').next('.errors').remove();
-    this.$errorContainer.html('<p class="error">'+error+'</p>').removeClass('hidden');
-    this.$preview.addClass('hidden').html('');
-
-  }
-
-
-});
-
-
+		setError: function() {
+			this.$spinner.addClass('hidden');
+			this.$error.removeClass('hidden');
+			this.$success.addClass('hidden');
+			this.$preview.addClass('hidden').html('');
+		},
+	});
 })(jQuery);
